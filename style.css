@@ -1,0 +1,60 @@
+*, ::before, ::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f0f0f0;
+}
+
+h1 {
+    text-align: center;
+    margin: 10px 0;
+}
+
+canvas {
+    border: 1px solid #333;
+    background-color: #fff;
+    width: 600px;
+    height: 600px;
+}
+
+.board {
+    margin: 10px auto;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.panel {
+    flex: 1;
+    font-size: 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+#score, #level, #previews {
+    font-size: 32px;
+    display: inline-block;
+    width: 100px;
+}
+
+#score, #level {
+    font-family: 'Changa', Arial, sans-serif;
+    text-align: right;
+    background-color: #655d73;
+    color: #ddd;
+    border-radius: 10px;
+    padding-right: 4px;
+}
+
+#buttons button {
+    font-size: 20px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    width: 150px;
+}
