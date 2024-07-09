@@ -1,8 +1,9 @@
+import { Segment } from "./segment"
 export class Snake {
     constructor(x, y) {
-        this.head = {x: x, y: y}
+        this.head = new Segment(x, y)
         this.direction = 'left'
-        this.tail = {x: x + 1, y: y}
+        this.tail = new Segment(x + 1, y)
     }
 
     turnLeft() {
