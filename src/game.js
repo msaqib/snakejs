@@ -1,10 +1,16 @@
 import { Board } from "./board";
 export class Game {
-    constructor() {
-        this.board = new Board(600, 600, 120, 120)
+    constructor(context) {
+        this.board = new Board(600, 600, 30, 30, context)
+        this.boundUpdate = this.update.bind(this)
     }
 
-    update(context) {
-        this.board.render(context)
+    update() {
+        this.board.update()
+    }
+
+    start() {
+        this.board.drawInitialSnake()
+        setInterval(this.boundUpdate, 2000)
     }
 }

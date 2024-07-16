@@ -1,7 +1,9 @@
 import { Game } from "./game";
 
-const game = new Game()
 const canvas = document.getElementById('game')
 const context = canvas.getContext("2d");
+canvas.width = 600
+canvas.height = 600
 
-game.update(context)  
+const game = new Game(context)
+game.start(context)  

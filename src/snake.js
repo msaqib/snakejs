@@ -1,50 +1,55 @@
-import { Segment } from "./segment"
 export class Snake {
     constructor(x, y) {
-        this.head = new Segment(x, y)
-        this.direction = 'left'
-        this.tail = new Segment(x + 1, y)
+        this.body = [{position: {x: x, y: y}}, {position: {x: x + 1, y: y}}, {position: {x: x + 2, y: y}}]
+        this.direction = {x: -1, y: 0}
+    }
+
+    get head() {
+        return this.body[0]
+    }
+
+    get tail() {
+        return this.body[this.body.length - 1]
     }
 
     turnLeft() {
-        if (this.direction !== 'left' && this.direction !== 'right') {
-            this.direction = 'left'
+        if (!(this.direction.x === 1 && this.direction === 0)) {
+            this.direction = {x: -1, y: 0}
         }
     }
 
     turnRight() {
-        if (this.direction !== 'left' && this.direction !== 'right') {
-            this.direction = 'right'
+        if (!(this.direction.x === -1 && this.direction.y === 0)){
+            this.direction = {x: 1, y: 0}
         }
     }
 
     turnUp() {
-        if (this.direction !== 'up' && this.direction !== 'down') {
-            this.direction = 'up'
+        if (!(this.direction.x === 0 && this.direction.y === 1)) {
+            this.direction = {x: 0, y: -1}
         }
     }
 
     turnDown() {
-        if (this.direction !== 'up' && this.direction !== 'down') {
-            this.direction = 'down'
+        if (!(this.direction.x === 0 && this.direction.y === -1)) {
+            this.direction = {x: 0, y: 1}
         }
     }
 
     step() {
-        if (direction === 'right') {
-            this.head.x = this.head.x + 1
-        }
+        const newHead = {position: {x: this.body[0].position.x + this.direction.x, y: this.body[0].position.y + this.direction.y}}
+        this.body.unshift(newHead)
+    }
 
-        else if (direction === 'left') {
-            this.head.x = this.head.x - 1
-        }
+    moveTail() {
+        this.body.pop()
+    }
 
-        else if (direction === 'up') {
-            this.head.y = this.head.y - 1
+    biteSelf() {
+        for (let i = 1 ; i < this.body.length ; i++) {
+            if (this.head.position.x === this.body[i].position.x && this.head.position.y === this.body[i].position.y)
+                return true
         }
-
-        else if (direction === 'down') {
-            this.head.y = this.head.y + 1
-        }
+        return false
     }
 }

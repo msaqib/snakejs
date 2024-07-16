@@ -1,14 +1,50 @@
 import { Snake } from "./snake"
+import { Util } from "./util"
 export class Board {
-    constructor(canvaswidth, canvasheight, columns, rows) {
+    constructor(canvaswidth, canvasheight, columns, rows, context) {
         this.width = columns
         this.height = rows
         this.boxheight = canvasheight / rows
         this.boxwidth = canvaswidth / columns
-        this.snake = new Snake(100, 100)
-        this.fruit = null
+        this.snake = new Snake(10, 10)
+        this.food = null
         this.scoreObservers = []
         this.gameObservers = []
+        this.registerKeyListener()
+        this.foodVisible = false
+        this.snakeCorner = null
+        this.context = context
+    }
+
+    registerKeyListener() {
+        document.addEventListener('keydown', (event) => {
+            const key = event.key
+            const prevDirection = this.snake.direction
+            switch(key){
+                case "ArrowLeft":
+                    this.snake.turnLeft()
+                    break;
+                case "ArrowRight":
+                    this.snake.turnRight()
+                    break
+                case "ArrowUp":
+                    this.snake.turnUp()
+                    break
+                case "ArrowDown":
+                    this.snake.turnDown()
+                    break
+            }
+            const newDirection = this.snake.direction
+            this.snakeCorner = Util.whichCorner(prevDirection, newDirection)
+        })
+    }
+
+    drawFood() {
+        const x = Math.floor(Math.random() * this.width)
+        const y = Math.floor(Math.random() * this.height)
+        this.food = {x: x, y: y}
+        this.context.fillStyle = 'red'
+        this.context.fillRect(x * this.boxwidth + this.boxwidth / 4, y * this.boxheight + this.boxheight / 4, this.boxwidth / 2, this.boxheight / 2)
     }
 
     addScoreObserver(observer) {
@@ -35,74 +71,59 @@ export class Board {
         this.gameoverObservers.forEach(observer => observer.end())
     }
 
-    render(context) {
-        const cellWidth = context.canvas.width / this.width;
-        const cellHeight = context.canvas.height / this.height;
-        context.strokeStyle = 'black'
-        context.fillStyle = 'black'
-        this.drawHorizontalLine(context, this.snake.head.position.x, this.snake.head.position.y)
-        this.drawHorizontalLine(context, this.snake.tail.position.x, this.snake.tail.position.y)
+    drawGrid() {
+        this.context.strokeStyle = '#ddd'
+        for (let i = 0 ; i < this.width ; i++) {
+            for (let j = 0 ; j < this.height ; j++) {
+                this.context.strokeRect(j * this.boxwidth, i * this.boxheight, this.boxwidth, this.boxheight)
+                this.context.stroke()
+            }
+        }
+        this.context.strokeStyle = 'black'
     }
 
-    drawTopLeftLShape(ctx, x, y) {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + size / 2, y);
-        ctx.lineTo(x + size / 2, y + size / 2);
-        ctx.lineTo(x, y + size / 2);
-        ctx.closePath();
-        ctx.fill();
+    drawInitialSnake() {
+        for (let i = this.snake.head.position.x ; i <= this.snake.tail.position.x ; i++) {
+            this.drawHorizontalLine(i, this.snake.head.position.y, this.boxwidth, this.boxheight)
+        }
     }
 
-    // Top Right L-shape
-    drawTopRightLShape(ctx, x, y) {
-        ctx.beginPath();
-        ctx.moveTo(x + size, y);
-        ctx.lineTo(x + size / 2, y);
-        ctx.lineTo(x + size / 2, y + size / 2);
-        ctx.lineTo(x + size, y + size / 2);
-        ctx.closePath();
-        ctx.fill();
+    update() {
+        const tail = this.snake.tail
+        this.context.clearRect(tail.position.x * this.boxwidth, tail.position.y * this.boxheight, this.boxwidth, this.boxheight)
+        this.snake.step()
+        if (this.snake.biteSelf()) {
+            console.log('Dead')
+            this.notifyGameoverObservers()
+        }
+        else if (this.foodVisible && this.snake.head.position.x === this.food.x && this.snake.head.position.y === this.food.y) {
+            this.notifyScoreObservers()
+            this.context.clearRect(this.snake.head.position.x * this.boxwidth, this.snake.head.position.y * this.boxheight, this.boxwidth, this.boxheight)
+            this.food = null
+            this.foodVisible = false
+        }
+        else {
+            this.snake.moveTail()
+        }
+        this.render()
+        const rand = Math.random()
+        if (rand > 0.5 && !this.foodVisible) {
+            this.foodVisible = true
+            this.drawFood()
+        }
     }
 
-    // Bottom Right L-shape
-    drawBottomRightLShape(ctx, x, y) {
-        ctx.beginPath();
-        ctx.moveTo(x + size, y + size);
-        ctx.lineTo(x + size / 2, y + size);
-        ctx.lineTo(x + size / 2, y + size / 2);
-        ctx.lineTo(x + size, y + size / 2);
-        ctx.closePath();
-        ctx.fill();
+    render() {
+        this.context.strokeStyle = 'black'
+        this.context.fillStyle = 'black'
+        this.drawHorizontalLine(this.snake.head.position.x, this.snake.head.position.y)
     }
 
-    // Bottom Left L-shape
-    drawBottomLeftLShape(ctx, x, y) {
-        ctx.beginPath();
-        ctx.moveTo(x, y + size);
-        ctx.lineTo(x + size / 2, y + size);
-        ctx.lineTo(x + size / 2, y + size / 2);
-        ctx.lineTo(x, y + size / 2);
-        ctx.closePath();
-        ctx.fill();
-    }
-
-    // Horizontal Line
-    drawHorizontalLine(ctx, x, y) {
-        const size = 1;
-        console.log(x, y, this.boxwidth, this.boxheight);
-        // console.log((x + size) * this.boxwidth, (y + size / 2) * this.boxheight);
-        ctx.beginPath();
-        ctx.moveTo(x * this.boxwidth, (y + size / 2) * this.boxheight);
-        ctx.lineTo((x + size) * this.boxwidth, (y + size / 2) * this.boxheight);
-        ctx.stroke();
-    }
-
-    // Vertical Line
-    drawVerticalLine(ctx, x, y) {
-        ctx.beginPath();
-        ctx.moveTo(x + size / 2, y);
-        ctx.lineTo(x + size / 2, y + size);
-        ctx.stroke();
+    drawHorizontalLine(x, y) {
+        const size = 10
+        this.context.strokeStyle = 'black'
+        this.context.fillStyle = 'black'
+        this.context.fillRect(x * this.boxwidth, y * this.boxheight, this.boxwidth, this.boxheight)
+        this.context.stroke()
     }
 }
