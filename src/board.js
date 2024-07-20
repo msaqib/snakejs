@@ -1,7 +1,7 @@
 import { Snake } from "./snake"
 import { Util } from "./util"
 export class Board {
-    constructor(canvaswidth, canvasheight, columns, rows, context) {
+    constructor(canvaswidth, canvasheight, rows, columns, context) {
         this.width = columns
         this.height = rows
         this.boxheight = canvasheight / rows
@@ -83,9 +83,12 @@ export class Board {
     }
 
     drawInitialSnake() {
-        for (let i = this.snake.head.position.x ; i <= this.snake.tail.position.x ; i++) {
-            this.drawHorizontalLine(i, this.snake.head.position.y, this.boxwidth, this.boxheight)
+        for (let segment of this.snake.body) {
+            this.drawSegment(segment.position.x, segment.position.y, this.boxwidth, this.boxheight)
         }
+        // for (let i = this.snake.head.position.x ; i <= this.snake.tail.position.x ; i++) {
+        //     this.drawHorizontalLine(i, this.snake.head.position.y, this.boxwidth, this.boxheight)
+        // }
     }
 
     update() {
@@ -116,11 +119,10 @@ export class Board {
     render() {
         this.context.strokeStyle = 'black'
         this.context.fillStyle = 'black'
-        this.drawHorizontalLine(this.snake.head.position.x, this.snake.head.position.y)
+        this.drawSegment(this.snake.head.position.x, this.snake.head.position.y)
     }
 
-    drawHorizontalLine(x, y) {
-        const size = 10
+    drawSegment(x, y) {
         this.context.strokeStyle = 'black'
         this.context.fillStyle = 'black'
         this.context.fillRect(x * this.boxwidth, y * this.boxheight, this.boxwidth, this.boxheight)
