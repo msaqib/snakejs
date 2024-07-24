@@ -1,3 +1,4 @@
+import _ from 'lodash'
 export class Snake {
     constructor(x, y) {
         this.body = [{position: {x: x, y: y}}, {position: {x: x + 1, y: y}}, {position: {x: x + 2, y: y}}]
@@ -13,25 +14,25 @@ export class Snake {
     }
 
     turnLeft() {
-        if (!(this.direction.x === 1 && this.direction === 0)) {
+        if (!_.isEqual(this.direction, {x: 1, y: 0})) {
             this.direction = {x: -1, y: 0}
         }
     }
 
     turnRight() {
-        if (!(this.direction.x === -1 && this.direction.y === 0)){
+        if (!_.isEqual(this.direction, {x: -1, y: 0})) {
             this.direction = {x: 1, y: 0}
         }
     }
 
     turnUp() {
-        if (!(this.direction.x === 0 && this.direction.y === 1)) {
+        if (!_.isEqual(this.direction, {x: 0, y: 1})) {
             this.direction = {x: 0, y: -1}
         }
     }
 
     turnDown() {
-        if (!(this.direction.x === 0 && this.direction.y === -1)) {
+        if (!_.isEqual(this.direction, {x: 0, y: -1})) {
             this.direction = {x: 0, y: 1}
         }
     }
@@ -47,9 +48,15 @@ export class Snake {
 
     biteSelf() {
         for (let i = 1 ; i < this.body.length ; i++) {
-            if (this.head.position.x === this.body[i].position.x && this.head.position.y === this.body[i].position.y)
+            if (_.isEqual(this.head.position, this.body[i].position))
                 return true
         }
         return false
+    }
+
+    checkOverlap(coordinates) {
+        return this.body.some( (segment) => {
+            return _.isEqual(segment.position, coordinates)
+        })
     }
 }

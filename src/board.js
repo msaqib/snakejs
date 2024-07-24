@@ -1,5 +1,6 @@
 import { Snake } from "./snake"
 import { Util } from "./util"
+import _ from 'lodash'
 export class Board {
     constructor(canvaswidth, canvasheight, rows, columns, context) {
         this.width = columns
@@ -9,11 +10,16 @@ export class Board {
         this.snake = new Snake(10, 10)
         this.food = null
         this.scoreObservers = []
-        this.gameObservers = []
+        this.gameoverObservers = []
         this.registerKeyListener()
         this.foodVisible = false
-        this.snakeCorner = null
         this.context = context
+        this.foodInterval = null
+    }
+
+    clear() {
+        clearInterval(this.foodInterval)
+        this.context.clearRect(0, 0, this.width * this.boxwidth, this.height * this.boxheight)
     }
 
     registerKeyListener() {
@@ -34,15 +40,27 @@ export class Board {
                     this.snake.turnDown()
                     break
             }
-            const newDirection = this.snake.direction
-            this.snakeCorner = Util.whichCorner(prevDirection, newDirection)
         })
     }
 
     drawFood() {
-        const x = Math.floor(Math.random() * this.width)
-        const y = Math.floor(Math.random() * this.height)
-        this.food = {x: x, y: y}
+        const min = 24000
+        const max = 54000
+        this.foodInterval = setTimeout(() => {
+            if (this.foodVisible) {
+                this.context.clearRect(this.food.x * this.boxwidth, this.food.y * this.boxheight, this.boxwidth, this.boxheight)
+                this.food = null
+                this.foodVisible = false
+            }
+        }, Math.floor(Math.random() * (max - min)) + min)
+        let x = null
+        let y = null
+        do {
+            x = Math.floor(Math.random() * this.width)
+            y = Math.floor(Math.random() * this.height)
+            this.food = {x: x, y: y}
+        } while (this.snake.checkOverlap(this.food))
+        
         this.context.fillStyle = 'red'
         this.context.fillRect(x * this.boxwidth + this.boxwidth / 4, y * this.boxheight + this.boxheight / 4, this.boxwidth / 2, this.boxheight / 2)
     }
@@ -86,20 +104,17 @@ export class Board {
         for (let segment of this.snake.body) {
             this.drawSegment(segment.position.x, segment.position.y, this.boxwidth, this.boxheight)
         }
-        // for (let i = this.snake.head.position.x ; i <= this.snake.tail.position.x ; i++) {
-        //     this.drawHorizontalLine(i, this.snake.head.position.y, this.boxwidth, this.boxheight)
-        // }
     }
 
     update() {
         const tail = this.snake.tail
         this.context.clearRect(tail.position.x * this.boxwidth, tail.position.y * this.boxheight, this.boxwidth, this.boxheight)
         this.snake.step()
-        if (this.snake.biteSelf()) {
-            console.log('Dead')
+        if (this.snake.biteSelf() || this.hitWall()) {
             this.notifyGameoverObservers()
         }
-        else if (this.foodVisible && this.snake.head.position.x === this.food.x && this.snake.head.position.y === this.food.y) {
+        else if (this.foodVisible && _.isEqual(this.snake.head.position, this.food)) {
+            clearInterval(this.foodInterval)
             this.notifyScoreObservers()
             this.context.clearRect(this.snake.head.position.x * this.boxwidth, this.snake.head.position.y * this.boxheight, this.boxwidth, this.boxheight)
             this.food = null
@@ -127,5 +142,9 @@ export class Board {
         this.context.fillStyle = 'black'
         this.context.fillRect(x * this.boxwidth, y * this.boxheight, this.boxwidth, this.boxheight)
         this.context.stroke()
+    }
+
+    hitWall() {
+        return (this.snake.head.position.x < 0 || this.snake.head.position.y < 0 || this.snake.head.position.x >= this.width - 1 || this.snake.head.position.y > this.height - 1)
     }
 }
