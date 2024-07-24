@@ -74,7 +74,7 @@ export class Board {
     }
 
     notifyScoreObservers(score) {
-        this.scoreObservers.forEach(observer => observer.update(score))
+        this.scoreObservers.forEach(observer => observer.onScore(score))
     }
 
     addGameoverObserver(observer) {

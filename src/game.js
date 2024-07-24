@@ -1,7 +1,6 @@
 import { Board } from "./board";
 export class Game {
     constructor(context) {
-        //this.initBoard()
         this.context = context
         this.updateInterval = null
         this.boundUpdate = this.update.bind(this)
@@ -23,10 +22,15 @@ export class Game {
         clearInterval(this.updateInterval)
     }
 
+    onScore() {
+
+    }
+
     start() {
         this.initBoard()
         this.board.drawInitialSnake()
         this.board.addGameoverObserver(this)
+        this.board.addScoreObserver(this)
         this.updateInterval = setInterval(this.boundUpdate, 800)
     }
 }
