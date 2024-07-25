@@ -4,6 +4,7 @@ export class Game {
         this.context = context
         this.updateInterval = null
         this.boundUpdate = this.update.bind(this)
+        this.scoreElement = document.getElementById('score')
     }
 
     initBoard() {
@@ -12,6 +13,7 @@ export class Game {
         if (this.updateInterval) {
             clearInterval(this.updateInterval)
         }
+        this.scoreElement.innerText = this.score
     }
 
     update() {
@@ -23,10 +25,12 @@ export class Game {
     }
 
     onScore() {
-
+        this.score += 1
+        this.scoreElement.innerText = this.score
     }
 
     start() {
+        this.score = 0
         this.initBoard()
         this.board.drawInitialSnake()
         this.board.addGameoverObserver(this)
